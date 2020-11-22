@@ -11,7 +11,8 @@
   "language":"en",
   "content":"source",
   "dependencies":[
-    "deltics.inc:1.0.2"
+    "deltics.inc:1.0.2",
+    "deltics.exceptions:1.0.0-beta.4"
   ],
   "source":{
       "files":[
