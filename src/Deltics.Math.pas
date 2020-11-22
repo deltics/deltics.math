@@ -70,7 +70,7 @@ interface
 
   function Ceil(const aValue: Double): Integer; {$ifdef InlineMethods} inline; {$endif}
   function Floor(const aValue: Double): Integer; {$ifdef InlineMethods} inline; {$endif}
-  function Round(const aValue: Double; const aDirection: TRoundDirection): Integer; {$ifdef InlineMethods} inline; {$endif}
+  function Round(const aValue: Double; const aDirection: TRoundDirection): Integer;
 
 
   function Sign(const aValue: Integer): TValueSign; overload; {$ifdef InlineMethods} inline; {$endif}
