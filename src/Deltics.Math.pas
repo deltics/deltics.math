@@ -43,116 +43,207 @@
 
 interface
 
-  function Min(ValueA, ValueB: Int64): Int64; overload;
-  function Min(ValueA, ValueB: Cardinal): Cardinal; overload;
-  function Min(ValueA, ValueB: Integer): Integer; overload;
+  type
+    TValueSign = -1..1;
 
-  function Max(ValueA, ValueB: Int64): Int64; overload;
-  function Max(ValueA, ValueB: Cardinal): Cardinal; overload;
-  function Max(ValueA, ValueB: Integer): Integer; overload;
+  const
+    Negative = -1;
+    Zero     = 0;
+    Positive = 1;
 
+
+  function Min(const aValueA, aValueB: Int64): Int64; overload; {$ifdef InlineMethods} inline; {$endif}
+  function Min(const aValueA, aValueB: Cardinal): Cardinal; overload; {$ifdef InlineMethods} inline; {$endif}
+  function Min(const aValueA, aValueB: Integer): Integer; overload; {$ifdef InlineMethods} inline; {$endif}
+
+  function Max(const aValueA, aValueB: Int64): Int64; overload; {$ifdef InlineMethods} inline; {$endif}
+  function Max(const aValueA, aValueB: Cardinal): Cardinal; overload; {$ifdef InlineMethods} inline; {$endif}
+  function Max(const aValueA, aValueB: Integer): Integer; overload; {$ifdef InlineMethods} inline; {$endif}
 
   type
-    TRoundingStrategy = (
-                         rsDefault,
-                         rsAwayFromZero,
-                         rsTowardsZero
-                        );
+    TRoundDirection = (
+      rdAwayFromZero,
+      rdTowardNegInfinity,
+      rdTowardPosInfinity,
+      rdTowardZero
+    );
 
-  function Round(const aValue: Extended;
-                 const aStrategy: TRoundingStrategy = rsDefault): Integer;
+  function Ceil(const aValue: Double): Integer; {$ifdef InlineMethods} inline; {$endif}
+  function Floor(const aValue: Double): Integer; {$ifdef InlineMethods} inline; {$endif}
+  function Round(const aValue: Double; const aDirection: TRoundDirection): Integer;
+
+
+  function Sign(const aValue: Integer): TValueSign; overload; {$ifdef InlineMethods} inline; {$endif}
+  function Sign(const aValue: Int64): TValueSign; overload; {$ifdef InlineMethods} inline; {$endif}
+  function Sign(const aValue: Single): TValueSign; overload; {$ifdef InlineMethods} inline; {$endif}
+  function Sign(const aValue: Double): TValueSign; overload; {$ifdef InlineMethods} inline; {$endif}
+  function Sign(const aValue: Extended): TValueSign; overload; {$ifdef InlineMethods} inline; {$endif}
 
 
 
 implementation
 
+  uses
+    Math,
+    Deltics.Exceptions;
+
+
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function Min(ValueA, ValueB: Int64): Int64;
+  function Min(const aValueA, aValueB: Int64): Int64;
   begin
-    if (ValueA < ValueB) then
-      result := ValueA
+    if (aValueA < aValueB) then
+      result := aValueA
     else
-      result := ValueB;
+      result := aValueB;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function Min(ValueA, ValueB: Cardinal): Cardinal;
+  function Min(const aValueA, aValueB: Cardinal): Cardinal;
   begin
-    if (ValueA < ValueB) then
-      result := ValueA
+    if (aValueA < aValueB) then
+      result := aValueA
     else
-      result := ValueB;
+      result := aValueB;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function Min(ValueA, ValueB: Integer): Integer;
+  function Min(const aValueA, aValueB: Integer): Integer;
   begin
-    if (ValueA < ValueB) then
-      result := ValueA
+    if (aValueA < aValueB) then
+      result := aValueA
     else
-      result := ValueB;
+      result := aValueB;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function Max(ValueA, ValueB: Int64): Int64;
+  function Max(const aValueA, aValueB: Int64): Int64;
   begin
-    if (ValueA > ValueB) then
-      result := ValueA
+    if (aValueA > aValueB) then
+      result := aValueA
     else
-      result := ValueB;
+      result := aValueB;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function Max(ValueA, ValueB: Cardinal): Cardinal;
+  function Max(const aValueA, aValueB: Cardinal): Cardinal;
   begin
-    if (ValueA > ValueB) then
-      result := ValueA
+    if (aValueA > aValueB) then
+      result := aValueA
     else
-      result := ValueB;
+      result := aValueB;
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function Max(ValueA, ValueB: Integer): Integer;
+  function Max(const aValueA, aValueB: Integer): Integer;
   begin
-    if (ValueA > ValueB) then
-      result := ValueA
+    if (aValueA > aValueB) then
+      result := aValueA
     else
-      result := ValueB;
+      result := aValueB;
+  end;
+
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function Ceil(const aValue: Double): Integer;
+  begin
+    result := Trunc(aValue);
+
+    if   (Deltics.Math.Sign(aValue) = Positive)
+     and (Frac(aValue) <> 0) then
+      Inc(result);
+  end;
+
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function Floor(const aValue: Double): Integer;
+  begin
+    result := Trunc(aValue);
+
+    if   (Deltics.Math.Sign(aValue) = Negative)
+     and (Frac(aValue) <> 0) then
+      Dec(result);
   end;
 
 
   { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
-  function Round(const aValue: Extended;
-                 const aStrategy: TRoundingStrategy = rsDefault): Integer;
-  var
-    remainder: Extended;
+  function Round(const aValue: Double;
+                 const aDirection: TRoundDirection): Integer;
   begin
-    if (aStrategy = rsDefault) then
-      result := System.Round(aValue)
+    case aDirection of
+      rdAwayFromZero      : if Frac(aValue) = 0 then
+                              result := Trunc(aValue)
+                            else
+                              result := Trunc(aValue) + Deltics.Math.Sign(aValue);
+      rdTowardNegInfinity : result := Floor(aValue);
+      rdTowardPosInfinity : result := Ceil(aValue);
+      rdTowardZero        : result := Trunc(aValue);
     else
-    begin
-      result    := Trunc(aValue);
-      remainder := Frac(aValue);
-
-      case aStrategy of
-        rsAwayFromZero  : if (remainder < 0) then
-                            Dec(result)
-                          else if (remainder > 0) then
-                            Inc(result);
-
-        rsTowardsZero   : if (remainder < 0) then
-                            Inc(result)
-                          else if (remainder > 0) then
-                            Dec(result);
-      end;
+      raise ENotImplemented.Create;
     end;
   end;
+
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function Sign(const aValue: Integer): TValueSign;
+  begin
+    result := Zero;
+    if aValue < 0 then
+      result := Negative
+    else if aValue > 0 then
+      result := Positive;
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function Sign(const aValue: Int64): TValueSign;
+  begin
+    result := Zero;
+    if aValue < 0 then
+      result := Negative
+    else if aValue > 0 then
+      result := Positive;
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function Sign(const aValue: Single): TValueSign;
+  begin
+    if (PInteger(@aValue)^ and $7fffffff) = $00000000 then
+      result := Zero
+    else if (PInteger(@aValue)^ and $80000000) = $80000000 then
+      result := Negative
+    else
+      result := Positive;
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function Sign(const aValue: Double): TValueSign;
+  begin
+    if ((PInt64(@aValue)^ and $7fffffffffffffff) = $0000000000000000) then
+      result := Zero
+    else if ((PInt64(@aValue)^ and $8000000000000000) = $8000000000000000) then
+      result := Negative
+    else
+      result := Positive;
+  end;
+
+
+  { - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - }
+  function Sign(const aValue: Extended): TValueSign;
+  begin
+    result := Math.Sign(aValue);
+  end;
+
 
 
 
